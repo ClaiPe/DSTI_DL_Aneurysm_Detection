@@ -11,8 +11,12 @@
 ## Project Overview
 This project implements a full end-to-end deep-learning pipeline for the automatic detection of intracranial aneurysm using 3D Magnetic Resonance Angiography (MRA).
 The goal is to support radiologists by identifying suspicious regions in volumetric scans, reducing workload and minimizing missed aneurysm, especially small or difficult-to-spot ones.  
-The pipeline includes a robust medical-imaging preprocessing workflow (DICOM → NIfTI, skull stripping, bias correction, resampling), a patch-based 3D deep-learning approach, and a complete scan-level inference system capable of generating 3D probability maps and interactive visualizations via a Streamlit app.
+The pipeline includes a comprehensive medical-imaging preprocessing workflow (DICOM → NIfTI, skull stripping, N4 bias-field correction, resampling), a patch-based 3D CNN and U-Net detection framework, and a complete scan-level inference system capable of generating 3D probability maps. 
+A dedicated Streamlit application allows interactive visualizations.
 
+Model pipeline overview:
+
+![Model overview](schemas/Model_pipeline_overview.PNG)
 ---
 
 ## Features
@@ -90,3 +94,55 @@ streamlit run app/main.py
 
 7. Explore
 Navigate through the 3D volume, inspect aneurysm predictions, visualize probability maps, and interact with the model’s output using intuitive tools designed for medical imaging.
+
+---
+
+## Overview of the tested architectures
+Two architectures were tested: 
+
+- A simple 3D CNN
+A lightweight baseline composed of three convolutional blocks followed by global pooling and a fully connected classifier.
+
+![3D CNN](schemas/3DCNN.PNG)
+
+- A Tiny 3D U-Net. 
+A compact encoder–decoder architecture with skip connections.
+It includes:
+- Two convolutional blocks (encoder)
+- A bottleneck block
+- Two upsampling blocks (decoder)
+- A global pooling layer for classification
+
+![3D Tiny U-Net](schemas/3D_U-Net.PNG)
+
+---
+
+## Results Summary
+
+The Tiny 3D U-Net with Focal Loss achieved the best validation performance:
+
+- Patch-level:
+    - Accuracy: 0.91
+    - Sensitivity: 0.94
+    - Specificity: 0.89
+    - AUC: 0.97
+    - F2-score: 0.92
+
+- Scan-level:
+    - Accuracy: 0.62
+    - Sensitivity: 0.68
+    - Specificity: 0.58
+    - AUC: 0.67
+
+Although the model demonstrated strong discriminative power at the patch scale, whole-scan performance remains challenging—reflecting known limitations of patch-based inference in 3D medical imaging.
+
+---
+
+## Acknowledgements
+This project was developed as part of the DSTI Deep Learning module.   
+
+The dataset was sourced from the RSNA Intracranial Aneurysm Detection competition on Kaggle:
+https://www.kaggle.com/competitions/rsna-intracranial-aneurysm-detection/overview  
+
+The approach and methodology were partially inspired by:
+Ham, S., Seo, J., Yun, J. et al. Automated detection of intracranial aneurysms using skeleton-based 3D patches, semantic segmentation, and auxiliary classification for overcoming data imbalance in brain TOF-MRA. Sci Rep 13, 12018 (2023). https://doi.org/10.1038/s41598-023-38586-9
